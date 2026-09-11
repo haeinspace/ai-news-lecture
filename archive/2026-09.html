@@ -8,6 +8,7 @@
 :root {
   --bg: #10141b; --panel: #1a2130; --text: #e6ebf4; --muted: #8b97ad;
   --news-a: #2b6cb0; --news-b: #1e3a5f; --story-a: #c05621; --story-b: #7b341e;
+  --paper-a: #2f855a; --paper-b: #1c4532;
   --line: #2b3548; --accent: #63b3ed;
 }
 * { box-sizing: border-box; }
@@ -38,11 +39,14 @@ main { max-width: 980px; margin: 0 auto; padding: 8px 20px 48px; }
   background: linear-gradient(135deg, var(--news-b) 0%, var(--panel) 45%); }
 .card.story { border-left-color: var(--story-a);
   background: linear-gradient(135deg, var(--story-b) 0%, var(--panel) 45%); }
+.card.paper { border-left-color: var(--paper-a);
+  background: linear-gradient(135deg, var(--paper-b) 0%, var(--panel) 45%); }
 .card .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   color: var(--muted); font-size: .8rem; margin-bottom: 8px; }
 .badge { padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: .74rem; }
 .card.news .badge  { background: var(--news-a); color: #fff; }
 .card.story .badge { background: var(--story-a); color: #fff; }
+.card.paper .badge { background: var(--paper-a); color: #fff; }
 .card h3 { margin: 0 0 8px; font-size: 1.06rem; line-height: 1.4; }
 .card .summary { margin: 0 0 8px; line-height: 1.6; font-size: .93rem; }
 .card .why { margin: 0 0 10px; color: #ffd580; font-size: .87rem; line-height: 1.5; }

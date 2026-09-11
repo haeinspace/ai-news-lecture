@@ -11,7 +11,7 @@ ai-news-lecture/
 ├── data/
 │   └── entries-YYYY-MM.json   # 월별 1파일. 처음엔 빈 배열 []
 ├── generate_html.py           # 최초 1회 작성. 이후엔 실행만 (절대 다시 고쳐 쓰지 않음)
-├── index.html                 # 최근 30일 카드 + 검색 + 뉴스/이야기 필터 (스크립트가 생성)
+├── index.html                 # 최근 30일 카드 + 검색 + 뉴스/이야기/논문 필터 (스크립트가 생성)
 ├── archive/
 │   ├── index.html             # 모든 월 목록 (스크립트가 생성)
 │   └── YYYY-MM.html           # 월별 전체 항목 (스크립트가 생성)
@@ -25,7 +25,7 @@ ai-news-lecture/
 {
   "id": "YYYY-MM-DD-NN",
   "date": "YYYY-MM-DD",
-  "category": "news 또는 story",
+  "category": "news 또는 story 또는 paper",
   "title": "제목",
   "summary": "너의 언어로 쓴 3~4문장 요약 (기사 원문 그대로 베끼지 말 것)",
   "why_interesting": "강의 시작 전에 왜 이 이야기가 흥미를 끄는지 1~2문장 코멘트",
@@ -40,6 +40,7 @@ ai-news-lecture/
 - 해당 월 파일이 없으면 빈 배열 `[]`로 만든 뒤 append.
 - 기존 항목은 절대 수정·삭제하지 않는다 (삭제는 별도 정리 작업에서만).
 - 파일 전체를 새로 쓰지 말고 항상 append 방식으로 처리한다.
+- **모든 항목(news/story/paper) 공통:** 검색 결과·출처에 명확히 나와 있지 않은 구체적 숫자(페이지 수, 메시지 수 등), 인명, 코드네임은 절대 지어내지 않는다. 확인 안 되면 "정확한 수치는 확인되지 않음"처럼 쓰거나 그 부분을 생략한다.
 
 ## 일상 작업 흐름
 
@@ -55,7 +56,7 @@ python3 generate_html.py
 ```
 
 `data/entries-*.json`을 전부 읽어 index.html(최근 30일), archive/index.html(월 목록),
-archive/YYYY-MM.html(월별 전체)을 다시 만든다. news는 파란색, story는 주황색 카드.
+archive/YYYY-MM.html(월별 전체)을 다시 만든다. news는 파란색, story는 주황색, paper(논문)는 초록색 카드.
 
 ## GitHub 원격 저장소
 
