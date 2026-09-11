@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지난 아카이브 — AI 강의 뉴스 큐레이션</title>
+<style>
+:root {
+  --bg: #10141b; --panel: #1a2130; --text: #e6ebf4; --muted: #8b97ad;
+  --news-a: #2b6cb0; --news-b: #1e3a5f; --story-a: #c05621; --story-b: #7b341e;
+  --line: #2b3548; --accent: #63b3ed;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "Apple SD Gothic Neo",
+  "Noto Sans KR", "Malgun Gothic", sans-serif; background: var(--bg); color: var(--text); }
+header { padding: 28px 20px 16px; max-width: 980px; margin: 0 auto; }
+header h1 { margin: 0 0 6px; font-size: 1.5rem; }
+header h1 a { color: var(--accent); text-decoration: none; }
+.updated { color: var(--muted); font-size: .85rem; }
+nav.topnav { margin-top: 10px; font-size: .9rem; }
+nav.topnav a { color: var(--accent); margin-right: 14px; text-decoration: none; }
+main { max-width: 980px; margin: 0 auto; padding: 8px 20px 48px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 20px; }
+.controls input[type=search] { flex: 1 1 260px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--text); font-size: .95rem; }
+.filter-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer; font-size: .88rem; }
+.filter-btn.active { border-color: var(--accent); color: var(--accent); }
+.month-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.month-list a { display: block; padding: 18px 14px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; color: var(--text);
+  text-decoration: none; font-size: 1.05rem; }
+.month-list a:hover { border-color: var(--accent); }
+.month-list .count { display: block; color: var(--muted); font-size: .8rem; margin-top: 4px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--muted);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+.card.news  { border-left-color: var(--news-a);
+  background: linear-gradient(135deg, var(--news-b) 0%, var(--panel) 45%); }
+.card.story { border-left-color: var(--story-a);
+  background: linear-gradient(135deg, var(--story-b) 0%, var(--panel) 45%); }
+.card .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  color: var(--muted); font-size: .8rem; margin-bottom: 8px; }
+.badge { padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: .74rem; }
+.card.news .badge  { background: var(--news-a); color: #fff; }
+.card.story .badge { background: var(--story-a); color: #fff; }
+.card h3 { margin: 0 0 8px; font-size: 1.06rem; line-height: 1.4; }
+.card .summary { margin: 0 0 8px; line-height: 1.6; font-size: .93rem; }
+.card .why { margin: 0 0 10px; color: #ffd580; font-size: .87rem; line-height: 1.5; }
+.card .foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; }
+.card .foot a { color: var(--accent); font-size: .84rem; text-decoration: none; word-break: break-all; }
+.card .foot a:hover { text-decoration: underline; }
+.conf { font-size: .74rem; color: var(--muted); border: 1px solid var(--line);
+  padding: 2px 8px; border-radius: 999px; }
+.empty { color: var(--muted); padding: 30px 0; text-align: center; }
+footer.page { max-width: 980px; margin: 0 auto; padding: 0 20px 30px;
+  color: var(--muted); font-size: .78rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html">AI 강의 뉴스 큐레이션</a></h1>
+  <div class="updated">마지막 업데이트: 2026-09-11</div>
+  <nav class="topnav">
+    <a href="../index.html">최신 (최근 30일)</a>
+    <a href="index.html">지난 아카이브 보기</a>
+  </nav>
+</header>
+<main>
+
+<div class="empty">아직 등록된 항목이 없습니다. data/entries-YYYY-MM.json 에 항목을 추가한 뒤 generate_html.py 를 다시 실행하세요.</div>
+</main>
+<footer class="page">생성형 AI 활용 강의용 뉴스·이야기 모음 · 생성일 2026-09-11</footer>
+<script>
+(function () {
+  var q = document.getElementById('q');
+  var btns = document.querySelectorAll('.filter-btn');
+  var cat = 'all';
+  function apply() {
+    var needle = (q && q.value ? q.value : '').toLowerCase();
+    document.querySelectorAll('.card').forEach(function (c) {
+      var okCat = cat === 'all' || c.getAttribute('data-category') === cat;
+      var hay = (c.getAttribute('data-search') || '').toLowerCase();
+      var okText = !needle || hay.indexOf(needle) !== -1;
+      c.style.display = (okCat && okText) ? '' : 'none';
+    });
+  }
+  if (q) q.addEventListener('input', apply);
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      cat = b.getAttribute('data-f');
+      btns.forEach(function (x) { x.classList.toggle('active', x === b); });
+      apply();
+    });
+  });
+})();
+</script>
+</body>
+</html>
