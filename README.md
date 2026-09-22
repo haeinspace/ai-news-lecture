@@ -46,7 +46,7 @@ ai-news-lecture/
 
 ## 일상 작업 흐름
 
-1. 최신 생성형 AI/LLM 뉴스와 흥미로운 AI 이야기를 조사한다.
+1. 최신 생성형 AI/LLM 뉴스를 **매일 5건** 조사하고, 흥미로운 AI 이야기를 1~2건 추가한다 (뉴스 5건 규칙: 2026-09-22 사용자 지시).
 2. 위 스키마대로 이번 달 entries JSON에 append 한다.
 3. `python3 generate_html.py` 실행 → index.html / archive 갱신.
 4. (선택) `git add -A && git commit`으로 변경 이력 남긴다.
