@@ -46,10 +46,11 @@ ai-news-lecture/
 
 ## 일상 작업 흐름
 
-1. 최신 생성형 AI/LLM 뉴스를 **매일 5건** 조사하고, 흥미로운 AI 이야기를 1~2건 추가한다 (뉴스 5건 규칙: 2026-09-22 사용자 지시). 고정 출처로 국내 매체 **AI타임스(https://www.aitimes.com/)** 를 매번 함께 확인한다 (2026-09-22 사용자 지시) — 기사 목록: `https://www.aitimes.com/news/articleList.html?view_type=sm`, 개별 기사 URL: `https://www.aitimes.com/news/articleView.html?idxno=<번호>`.
-2. 위 스키마대로 이번 달 entries JSON에 append 한다.
-3. `python3 generate_html.py` 실행 → index.html / archive 갱신.
-4. (선택) `git add -A && git commit`으로 변경 이력 남긴다.
+1. 최신 생성형 AI/LLM 뉴스를 **매일 5건** 조사하고, 흥미로운 AI 이야기를 1~2건 추가한다 (뉴스 5건 규칙: 2026-09-22 사용자 지시). **기사 선정은 한국어 기사 우선** (2026-10-07 사용자 지시): 국내 매체를 먼저 챙기고, 국내 매체가 다루지 않은 글로벌 소식만 해외 매체로 보완한다. 고정 출처로 국내 매체 **AI타임스(https://www.aitimes.com/)** 를 매번 함께 확인한다 (2026-09-22 사용자 지시) — 기사 목록: `https://www.aitimes.com/news/articleList.html?view_type=sm`, 개별 기사 URL: `https://www.aitimes.com/news/articleView.html?idxno=<번호>`.
+2. (자동 실행 브리핑 전용) 매일 실행 보고 마지막에 **"참고할 만한 다른 AI 기사 링크 5개"** 섹션을 덧붙인다 (2026-10-07 사용자 지시): entries에 넣지 않은 한국 AI 기사 5건의 제목+URL만 나열한다. 이 링크는 텔레그램 보고에만 포함하고 entries JSON에는 절대 넣지 않는다.
+3. 위 스키마대로 이번 달 entries JSON에 append 한다.
+4. `python3 generate_html.py` 실행 → index.html / archive 갱신.
+5. (선택) `git add -A && git commit`으로 변경 이력 남긴다.
 
 ## 사이트 재생성
 
