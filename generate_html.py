@@ -122,12 +122,11 @@ details.card .body .summary { margin-top: 12px; }
 .extra-links li a { color: var(--accent); text-decoration: none; }
 .extra-links li a:hover { text-decoration: underline; }
 .extra-links .xl-note { color: var(--faint); font-size: .78rem; }
-/* Design v4 (2026-10-07, user-ordered): 오늘자 항목만 3열 정사각형 그리드 */
+/* Design v4 (2026-10-07, user-ordered): 최신 날짜 항목 정사각형 그리드 (2열, 2026-10-07 요청) */
 .day-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 12px; }
 .day-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
 .day-head .day-sub { color: var(--faint); font-size: .78rem; }
-.day-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 26px; }
-@media (max-width: 760px) { .day-grid { grid-template-columns: repeat(2, 1fr); } }
+.day-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 26px; }
 @media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
 a.gcard { aspect-ratio: 1 / 1; background: var(--panel); border: 1px solid var(--line);
   border-left: 3px solid var(--faint); border-radius: 12px; padding: 14px 15px;
@@ -144,11 +143,11 @@ a.gcard.paper { border-left-color: var(--paper); }
 .gcard.story .badge { background: var(--story-bg); color: var(--story-fg); }
 .gcard.paper .badge { background: var(--paper-bg); color: var(--paper-fg); }
 .gcard time { color: var(--faint); font-size: .72rem; }
-.gcard h3 { margin: 0; font-size: .95rem; line-height: 1.38; font-weight: 700;
+.gcard h3 { margin: 0; font-size: 1.02rem; line-height: 1.4; font-weight: 700;
   letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 3;
   -webkit-box-orient: vertical; overflow: hidden; }
-.gcard .g-summary { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.gcard .g-summary { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.55;
+  display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .gcard .g-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line);
   display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .gcard .g-foot span:first-child { color: var(--accent); font-size: .76rem;
