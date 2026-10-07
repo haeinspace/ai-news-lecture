@@ -50,7 +50,7 @@ ai-news-lecture/
 2. (자동 실행 브리핑 전용) 매일 실행 보고 마지막에 **"참고할 만한 다른 AI 기사 링크 5개"** 섹션을 덧붙인다 (2026-10-07 사용자 지시): entries에 넣지 않은 한국 AI 기사 5건의 제목+URL만 나열한다. 이 링크는 텔레그램 보고에만 포함하고 entries JSON에는 절대 넣지 않는다.
 3. 위 스키마대로 이번 달 entries JSON에 append 한다.
 4. `python3 generate_html.py` 실행 → index.html / archive 갱신.
-5. (선택) `git add -A && git commit`으로 변경 이력 남긴다.
+5. (선택) `git add -A && git commit`으로 변경 이력 남긴다. 자동 실행(매일 12:30 크론)에서는 실행이 완전히 성공하면 `git push origin main`까지 자동으로 수행한다 (2026-10-07 사용자 지시 — 이 저장소 한해 상시 push 승인).
 
 ## 사이트 재생성
 
