@@ -103,11 +103,12 @@ details.card .body .summary { margin-top: 12px; }
 .day-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 12px; }
 .day-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
 .day-head .day-sub { color: var(--faint); font-size: .78rem; }
-.day-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 26px; }
-@media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
-a.gcard { aspect-ratio: 1 / 1; background: var(--panel); border: 1px solid var(--line);
-  border-radius: 12px; padding: 14px 15px;
-  display: flex; flex-direction: column; gap: 7px; overflow: hidden; text-decoration: none;
+.day-grid { column-count: 2; column-gap: 14px; margin-bottom: 26px; }
+@media (max-width: 500px) { .day-grid { column-count: 1; } }
+a.gcard { break-inside: avoid; display: flex; flex-direction: column; gap: 7px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 15px; margin: 0 0 14px;
+  overflow: hidden; text-decoration: none;
   color: var(--text); box-shadow: var(--card-shadow); transition: box-shadow .15s ease; }
 a.gcard:hover { box-shadow: var(--card-shadow-hover); }
 .gcard .g-top { display: flex; align-items: center; gap: 8px; }
@@ -121,7 +122,7 @@ a.gcard:hover { box-shadow: var(--card-shadow-hover); }
   letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 3;
   -webkit-box-orient: vertical; overflow: hidden; }
 .gcard .g-summary { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.55;
-  display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .gcard .g-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line);
   display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .gcard .g-foot span:first-child { color: var(--accent); font-size: .76rem;
