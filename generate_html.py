@@ -75,8 +75,9 @@ main { max-width: 980px; margin: 0 auto; padding: 14px 24px 56px; }
 .month-list a:hover { box-shadow: var(--card-shadow-hover); }
 .month-list .count { display: block; color: var(--muted); font-size: .8rem;
   font-weight: 400; margin-top: 5px; }
-/* Design v3 (2026-10-07, user-ordered): 컴팩트 리스트 — 한 줄 요약 행, 클릭 시 펼쳐짐 */
-details.card { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--faint);
+/* Design v3 (2026-10-07, user-ordered): 컴팩트 리스트 — 한 줄 요약 행, 클릭 시 펼쳐짐
+   v4c (2026-10-07): 좌측 색상줄 제거 — 속삭임 테두리만, 분류는 배지 색으로만 구분 */
+details.card { background: var(--panel); border: 1px solid var(--line);
   border-radius: 10px; margin-bottom: 8px; box-shadow: var(--card-shadow); }
 details.card:hover { box-shadow: var(--card-shadow-hover); }
 details.card summary { list-style: none; cursor: pointer; display: flex; align-items: center;
@@ -91,9 +92,6 @@ details.card summary .row-title { font-weight: 600; font-size: .95rem; line-heig
   min-width: 0; }
 details.card .body { padding: 2px 18px 14px 18px; border-top: 1px solid var(--line); }
 details.card .body .summary { margin-top: 12px; }
-.card.news  { border-left-color: var(--news); }
-.card.story { border-left-color: var(--story); }
-.card.paper { border-left-color: var(--paper); }
 .card .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   color: var(--faint); font-size: .78rem; margin: 12px 0 10px; }
 .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .72rem;
@@ -129,13 +127,10 @@ details.card .body .summary { margin-top: 12px; }
 .day-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 26px; }
 @media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
 a.gcard { aspect-ratio: 1 / 1; background: var(--panel); border: 1px solid var(--line);
-  border-left: 3px solid var(--faint); border-radius: 12px; padding: 14px 15px;
+  border-radius: 12px; padding: 14px 15px;
   display: flex; flex-direction: column; gap: 7px; overflow: hidden; text-decoration: none;
   color: var(--text); box-shadow: var(--card-shadow); transition: box-shadow .15s ease; }
 a.gcard:hover { box-shadow: var(--card-shadow-hover); }
-a.gcard.news  { border-left-color: var(--news); }
-a.gcard.story { border-left-color: var(--story); }
-a.gcard.paper { border-left-color: var(--paper); }
 .gcard .g-top { display: flex; align-items: center; gap: 8px; }
 .gcard .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .7rem;
   letter-spacing: .1px; flex: 0 0 auto; }
