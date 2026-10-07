@@ -75,15 +75,27 @@ main { max-width: 980px; margin: 0 auto; padding: 14px 24px 56px; }
 .month-list a:hover { box-shadow: var(--card-shadow-hover); }
 .month-list .count { display: block; color: var(--muted); font-size: .8rem;
   font-weight: 400; margin-top: 5px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--faint);
-  border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; box-shadow: var(--card-shadow);
-  transition: box-shadow .15s ease; }
-.card:hover { box-shadow: var(--card-shadow-hover); }
+/* Design v3 (2026-10-07, user-ordered): 컴팩트 리스트 — 한 줄 요약 행, 클릭 시 펼쳐짐 */
+details.card { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--faint);
+  border-radius: 10px; margin-bottom: 8px; box-shadow: var(--card-shadow); }
+details.card:hover { box-shadow: var(--card-shadow-hover); }
+details.card summary { list-style: none; cursor: pointer; display: flex; align-items: center;
+  gap: 10px; padding: 12px 16px; outline-offset: -2px; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary::after { content: "▸"; color: var(--faint); font-size: .8rem;
+  margin-left: auto; transition: transform .15s ease; flex: 0 0 auto; }
+details.card[open] summary::after { transform: rotate(90deg); }
+details.card summary .row-date { color: var(--faint); font-size: .76rem; flex: 0 0 auto; }
+details.card summary .row-title { font-weight: 600; font-size: .95rem; line-height: 1.4;
+  letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; }
+details.card .body { padding: 2px 18px 14px 18px; border-top: 1px solid var(--line); }
+details.card .body .summary { margin-top: 12px; }
 .card.news  { border-left-color: var(--news); }
 .card.story { border-left-color: var(--story); }
 .card.paper { border-left-color: var(--paper); }
 .card .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-  color: var(--faint); font-size: .78rem; margin-bottom: 10px; }
+  color: var(--faint); font-size: .78rem; margin: 12px 0 10px; }
 .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .72rem;
   letter-spacing: .1px; }
 .card.news .badge  { background: var(--news-bg); color: var(--news-fg); }
@@ -147,7 +159,10 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
       var okCat = cat === 'all' || c.getAttribute('data-category') === cat;
       var hay = (c.getAttribute('data-search') || '').toLowerCase();
       var okText = !needle || hay.indexOf(needle) !== -1;
-      c.style.display = (okCat && okText) ? '' : 'none';
+      var show = okCat && okText;
+      c.style.display = show ? '' : 'none';
+      // 검색어에 걸린 항목은 자동으로 펼침 (v3 compact list)
+      if (needle && show && c.tagName === 'DETAILS') c.open = true;
     });
   }
   if (q) q.addEventListener('input', apply);
@@ -240,21 +255,25 @@ def card_html(e):
     url = str(e.get("source_url", ""))
     conf = CONFIDENCE_LABEL.get(e.get("confidence", ""), esc(e.get("confidence", "")))
     return (
-        '<article class="card %s" data-category="%s" data-search="%s">\n'
-        '  <div class="meta"><span class="badge">%s</span>'
-        '<time>%s</time><span>%s</span></div>\n'
-        "  <h3>%s</h3>\n"
+        '<details class="card %s" data-category="%s" data-search="%s">\n'
+        '  <summary><span class="badge">%s</span>'
+        '<time class="row-date">%s</time>'
+        '<span class="row-title">%s</span></summary>\n'
+        '  <div class="body">\n'
+        '  <div class="meta"><time>%s</time><span>%s</span></div>\n'
         '  <p class="summary">%s</p>\n'
         '  <p class="why">💡 %s</p>\n'
         "%s"
         '  <div class="foot"><a href="%s" target="_blank" rel="noopener noreferrer">'
         "🔗 출처: %s</a><span class=\"conf\">%s</span></div>\n"
-        "</article>"
+        "  </div>\n"
+        "</details>"
     ) % (
         cat, cat, esc(hay),
         CATEGORY_LABEL[cat],
-        esc(e.get("date", "")), esc(e.get("id", "")),
+        esc(e.get("date", "")),
         esc(e.get("title", "")),
+        esc(e.get("date", "")), esc(e.get("id", "")),
         esc(e.get("summary", "")),
         esc(e.get("why_interesting", "")),
         extra_links_html(e),
