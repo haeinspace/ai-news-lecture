@@ -122,6 +122,38 @@ details.card .body .summary { margin-top: 12px; }
 .extra-links li a { color: var(--accent); text-decoration: none; }
 .extra-links li a:hover { text-decoration: underline; }
 .extra-links .xl-note { color: var(--faint); font-size: .78rem; }
+/* Design v4 (2026-10-07, user-ordered): 오늘자 항목만 3열 정사각형 그리드 */
+.day-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 12px; }
+.day-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
+.day-head .day-sub { color: var(--faint); font-size: .78rem; }
+.day-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 26px; }
+@media (max-width: 760px) { .day-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
+a.gcard { aspect-ratio: 1 / 1; background: var(--panel); border: 1px solid var(--line);
+  border-left: 3px solid var(--faint); border-radius: 12px; padding: 14px 15px;
+  display: flex; flex-direction: column; gap: 7px; overflow: hidden; text-decoration: none;
+  color: var(--text); box-shadow: var(--card-shadow); transition: box-shadow .15s ease; }
+a.gcard:hover { box-shadow: var(--card-shadow-hover); }
+a.gcard.news  { border-left-color: var(--news); }
+a.gcard.story { border-left-color: var(--story); }
+a.gcard.paper { border-left-color: var(--paper); }
+.gcard .g-top { display: flex; align-items: center; gap: 8px; }
+.gcard .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .7rem;
+  letter-spacing: .1px; flex: 0 0 auto; }
+.gcard.news .badge  { background: var(--news-bg); color: var(--news-fg); }
+.gcard.story .badge { background: var(--story-bg); color: var(--story-fg); }
+.gcard.paper .badge { background: var(--paper-bg); color: var(--paper-fg); }
+.gcard time { color: var(--faint); font-size: .72rem; }
+.gcard h3 { margin: 0; font-size: .95rem; line-height: 1.38; font-weight: 700;
+  letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden; }
+.gcard .g-summary { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.gcard .g-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gcard .g-foot span:first-child { color: var(--accent); font-size: .76rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gcard .conf { font-size: .66rem; flex: 0 0 auto; }
 footer.page { max-width: 980px; margin: 0 auto; padding: 0 24px 36px;
   color: var(--faint); font-size: .78rem; }
 """
@@ -244,6 +276,34 @@ def extra_links_html(e):
             '<ul>%s</ul></div>' % "".join(items))
 
 
+def grid_card_html(e):
+    """v4: 오늘자 항목용 정사각형 그리드 카드 (클릭 시 출처 페이지로 이동)."""
+    cat = e.get("category", "news")
+    if cat not in CATEGORY_LABEL:
+        cat = "news"
+    hay = " ".join(str(e.get(k, "")) for k in ("title", "summary", "why_interesting"))
+    for ln in (e.get("extra_links") or []):
+        if isinstance(ln, dict):
+            hay += " " + str(ln.get("title", "")) + " " + str(ln.get("comment", ""))
+    url = str(e.get("source_url", ""))
+    conf = CONFIDENCE_LABEL.get(e.get("confidence", ""), esc(e.get("confidence", "")))
+    return (
+        '<a class="card gcard %s" data-category="%s" data-search="%s" href="%s" '
+        'target="_blank" rel="noopener noreferrer">\n'
+        '  <span class="g-top"><span class="badge">%s</span><time>%s</time></span>\n'
+        "  <h3>%s</h3>\n"
+        '  <p class="g-summary">%s</p>\n'
+        '  <span class="g-foot"><span>🔗 %s</span><span class="conf">%s</span></span>\n'
+        "</a>"
+    ) % (
+        cat, cat, esc(hay), esc(url),
+        CATEGORY_LABEL[cat], esc(e.get("date", "")),
+        esc(e.get("title", "")),
+        esc(e.get("summary", "")),
+        esc(source_host(url)), conf,
+    )
+
+
 def card_html(e):
     cat = e.get("category", "news")
     if cat not in CATEGORY_LABEL:
@@ -330,9 +390,23 @@ def main():
     (ARCHIVE_DIR / "index.html").write_text(page, encoding="utf-8")
 
     # 3) 메인은 최근 30일 항목 (최신순) + 검색/필터
+    # v4: 가장 최신 날짜(보통 오늘자) 항목은 3열 정사각형 그리드로, 나머지는 컴팩트 리스트로
     cutoff = (today - timedelta(days=RECENT_DAYS)).isoformat()
     recent = [e for e in entries if str(e.get("date", "")) >= cutoff]
-    content = "\n".join(card_html(e) for e in recent) or empty_box()
+    today_entries = [e for e in recent if str(e.get("date", "")) == last_updated]
+    older_entries = [e for e in recent if str(e.get("date", "")) < last_updated]
+    parts = []
+    if today_entries:
+        parts.append('<div class="day-head"><h2>오늘 큐레이션 · %s</h2>'
+                     '<span class="day-sub">%d개 항목</span></div>' % (esc(last_updated), len(today_entries)))
+        parts.append('<div class="day-grid">%s</div>'
+                     % "".join(grid_card_html(e) for e in today_entries))
+    if older_entries:
+        if today_entries:
+            parts.append('<div class="day-head"><h2>지난 큐레이션</h2>'
+                         '<span class="day-sub">클릭하면 펼쳐짐</span></div>')
+        parts.append("\n".join(card_html(e) for e in older_entries))
+    content = "\n".join(parts) or empty_box()
     content += ('\n<p style="margin-top:22px"><a style="color:var(--accent)" '
                 'href="archive/index.html">← 지난 아카이브 보기</a></p>')
     page = render_page("AI 강의 뉴스 큐레이션", content,
