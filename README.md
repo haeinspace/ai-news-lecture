@@ -47,7 +47,7 @@ ai-news-lecture/
 ## 일상 작업 흐름
 
 1. 최신 생성형 AI/LLM 뉴스를 **매일 5건** 조사하고, 흥미로운 AI 이야기를 1~2건 추가한다 (뉴스 5건 규칙: 2026-09-22 사용자 지시). **기사 선정은 한국어 기사 우선** (2026-10-07 사용자 지시): 국내 매체를 먼저 챙기고, 국내 매체가 다루지 않은 글로벌 소식만 해외 매체로 보완한다. 고정 출처로 국내 매체 **AI타임스(https://www.aitimes.com/)** 를 매번 함께 확인한다 (2026-09-22 사용자 지시) — 기사 목록: `https://www.aitimes.com/news/articleList.html?view_type=sm`, 개별 기사 URL: `https://www.aitimes.com/news/articleView.html?idxno=<번호>`.
-2. (자동 실행 브리핑 전용) 매일 실행 보고 마지막에 **"참고할 만한 다른 AI 기사 링크 5개"** 섹션을 덧붙인다 (2026-10-07 사용자 지시): entries에 넣지 않은 한국 AI 기사 5건의 제목+URL만 나열한다. 이 링크는 텔레그램 보고에만 포함하고 entries JSON에는 절대 넣지 않는다.
+2. (자동 실행 브리핑 전용) 매일 실행 보고 마지막에 **"참고할 만한 다른 AI 기사 링크 5개"** 섹션을 덧붙인다 (2026-10-07 사용자 지시): entries 본문 항목과 중복되지 않는 한국 AI 기사 5건의 제목+URL(+한 줄 코멘트). 같은 5건은 오늘자 첫 뉴스 항목(id `YYYY-MM-DD-01`)의 선택 필드 `extra_links: [{title,url,comment}]`로도 JSON에 저장되며, `generate_html.py`가 그 카드 안에 "📎 참고할 만한 다른 AI 기사" 박스로 표시한다(2026-10-07 기능 추가). 이 링크는 별도 entries 항목으로 만들지 않고, 출처 URL 검증(curl 200)은 이 링크에도 적용된다.
 3. 위 스키마대로 이번 달 entries JSON에 append 한다.
 4. `python3 generate_html.py` 실행 → index.html / archive 갱신.
 5. (선택) `git add -A && git commit`으로 변경 이력 남긴다. 자동 실행(매일 12:30 크론)에서는 실행이 완전히 성공하면 `git push origin main`까지 자동으로 수행한다 (2026-10-07 사용자 지시 — 이 저장소 한해 상시 push 승인).

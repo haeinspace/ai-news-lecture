@@ -78,6 +78,14 @@ main { max-width: 980px; margin: 0 auto; padding: 8px 20px 48px; }
 .conf { font-size: .74rem; color: var(--muted); border: 1px solid var(--line);
   padding: 2px 8px; border-radius: 999px; }
 .empty { color: var(--muted); padding: 30px 0; text-align: center; }
+.extra-links { margin: 0 0 10px; padding: 10px 12px; background: rgba(99,179,237,.07);
+  border: 1px dashed var(--line); border-radius: 10px; }
+.extra-links .xl-head { color: var(--muted); font-size: .76rem; margin: 0 0 6px; }
+.extra-links ul { margin: 0; padding: 0; list-style: none; }
+.extra-links li { margin: 4px 0; font-size: .86rem; line-height: 1.45; }
+.extra-links li a { color: var(--accent); text-decoration: none; }
+.extra-links li a:hover { text-decoration: underline; }
+.extra-links .xl-note { color: var(--muted); font-size: .78rem; }
 footer.page { max-width: 980px; margin: 0 auto; padding: 0 20px 30px;
   color: var(--muted); font-size: .78rem; }
 """
@@ -175,11 +183,35 @@ def source_host(url):
     return u.split("/")[0] or u
 
 
+def extra_links_html(e):
+    """optional per-day extra_links: [{title,url,comment?}] -> dashed link box."""
+    xl = e.get("extra_links")
+    if not isinstance(xl, list) or not xl:
+        return ""
+    items = []
+    for ln in xl:
+        if not isinstance(ln, dict):
+            continue
+        note = str(ln.get("comment", "")).strip()
+        items.append(
+            '<li><a href="%s" target="_blank" rel="noopener noreferrer">%s</a>%s</li>'
+            % (esc(ln.get("url", "")), esc(ln.get("title", "")),
+               (' <span class="xl-note">— %s</span>' % esc(note)) if note else "")
+        )
+    if not items:
+        return ""
+    return ('<div class="extra-links"><p class="xl-head">📎 참고할 만한 다른 AI 기사</p>'
+            '<ul>%s</ul></div>' % "".join(items))
+
+
 def card_html(e):
     cat = e.get("category", "news")
     if cat not in CATEGORY_LABEL:
         cat = "news"
     hay = " ".join(str(e.get(k, "")) for k in ("title", "summary", "why_interesting"))
+    for ln in (e.get("extra_links") or []):
+        if isinstance(ln, dict):
+            hay += " " + str(ln.get("title", "")) + " " + str(ln.get("comment", ""))
     url = str(e.get("source_url", ""))
     conf = CONFIDENCE_LABEL.get(e.get("confidence", ""), esc(e.get("confidence", "")))
     return (
@@ -189,6 +221,7 @@ def card_html(e):
         "  <h3>%s</h3>\n"
         '  <p class="summary">%s</p>\n'
         '  <p class="why">💡 %s</p>\n'
+        "%s"
         '  <div class="foot"><a href="%s" target="_blank" rel="noopener noreferrer">'
         "🔗 출처: %s</a><span class=\"conf\">%s</span></div>\n"
         "</article>"
@@ -199,6 +232,7 @@ def card_html(e):
         esc(e.get("title", "")),
         esc(e.get("summary", "")),
         esc(e.get("why_interesting", "")),
+        extra_links_html(e),
         esc(url), esc(source_host(url)), conf,
     )
 
