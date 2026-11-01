@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11 아카이브 — AI 강의 뉴스 큐레이션</title>
+<style>
+/* Design v2 (2026-10-07, user-ordered redesign) — Notion식 밝고 깔끔한 톤:
+   흰 카드 + 속삭임 테두리(rgba(0,0,0,.1)) + 다층 부드러운 섀도 + 틴티드 pill 배지 */
+:root {
+  --bg: #f6f5f4; --panel: #ffffff; --text: rgba(0,0,0,.95); --muted: #615d59;
+  --faint: #a39e98;
+  --news: #0075de; --news-bg: #f2f9ff; --news-fg: #097fe8;
+  --story: #dd5b00; --story-bg: #fff4ec; --story-fg: #b64b00;
+  --paper: #1a8a34; --paper-bg: #eefaf1; --paper-fg: #157a2c;
+  --line: rgba(0,0,0,.1); --accent: #0075de;
+  --card-shadow: rgba(0,0,0,.04) 0 4px 18px, rgba(0,0,0,.027) 0 2px 7.8px,
+    rgba(0,0,0,.02) 0 .8px 2.9px, rgba(0,0,0,.01) 0 .2px 1px;
+  --card-shadow-hover: rgba(0,0,0,.06) 0 8px 26px, rgba(0,0,0,.03) 0 3px 10px,
+    rgba(0,0,0,.02) 0 1px 3px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Pretendard", "Inter", -apple-system, "Apple SD Gothic Neo",
+  "Noto Sans KR", "Malgun Gothic", sans-serif; background: var(--bg); color: var(--text);
+  -webkit-font-smoothing: antialiased; }
+header { padding: 44px 24px 10px; max-width: 980px; margin: 0 auto; }
+header h1 { margin: 0 0 6px; font-size: 1.72rem; font-weight: 700; letter-spacing: -0.5px; }
+header h1 a { color: var(--text); text-decoration: none; }
+.updated { color: var(--muted); font-size: .85rem; }
+nav.topnav { margin-top: 14px; font-size: .9rem; }
+nav.topnav a { color: var(--accent); margin-right: 16px; text-decoration: none; font-weight: 500; }
+nav.topnav a:hover { text-decoration: underline; }
+main { max-width: 980px; margin: 0 auto; padding: 14px 24px 56px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 24px;
+  position: sticky; top: 0; z-index: 50; padding: 12px 0 10px;
+  background: linear-gradient(var(--bg) 85%, rgba(246,245,244,0)); }
+.controls-label { width: 100%; color: var(--muted); font-size: .78rem; font-weight: 600;
+  letter-spacing: .3px; margin-bottom: 2px; }
+.controls input[type=search] { flex: 1 1 260px; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid #dddddd; background: var(--panel); color: var(--text); font-size: .95rem; }
+.controls input[type=search]:focus { outline: 2px solid #097fe8; outline-offset: 1px; border-color: transparent; }
+.controls input[type=search]::placeholder { color: var(--faint); }
+.filter-btn { padding: 8px 15px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--muted); cursor: pointer; font-size: .86rem;
+  font-weight: 500; transition: all .15s ease; }
+.filter-btn:hover { color: var(--text); border-color: rgba(0,0,0,.25); }
+.filter-btn.active { background: var(--news-bg); border-color: transparent; color: var(--news-fg);
+  font-weight: 600; }
+.month-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.month-list a { display: block; padding: 20px 16px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px; color: var(--text);
+  text-decoration: none; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.2px;
+  box-shadow: var(--card-shadow); transition: box-shadow .15s ease; }
+.month-list a:hover { box-shadow: var(--card-shadow-hover); }
+.month-list .count { display: block; color: var(--muted); font-size: .8rem;
+  font-weight: 400; margin-top: 5px; }
+/* Design v3 (2026-10-07, user-ordered): 컴팩트 리스트 — 한 줄 요약 행, 클릭 시 펼쳐짐
+   v4c (2026-10-07): 좌측 색상줄 제거 — 속삭임 테두리만, 분류는 배지 색으로만 구분 */
+details.card { background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; margin-bottom: 8px; box-shadow: var(--card-shadow); }
+details.card:hover { box-shadow: var(--card-shadow-hover); }
+details.card summary { list-style: none; cursor: pointer; display: flex; align-items: center;
+  gap: 10px; padding: 12px 16px; outline-offset: -2px; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary::after { content: "▸"; color: var(--faint); font-size: .8rem;
+  margin-left: auto; transition: transform .15s ease; flex: 0 0 auto; }
+details.card[open] summary::after { transform: rotate(90deg); }
+details.card summary .row-date { color: var(--faint); font-size: .76rem; flex: 0 0 auto; }
+details.card summary .row-title { font-weight: 600; font-size: .95rem; line-height: 1.4;
+  letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; }
+details.card .body { padding: 2px 18px 14px 18px; border-top: 1px solid var(--line); }
+details.card .body .summary { margin-top: 12px; }
+.card .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  color: var(--faint); font-size: .78rem; margin: 12px 0 10px; }
+.badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .72rem;
+  letter-spacing: .1px; }
+.card.news .badge  { background: var(--news-bg); color: var(--news-fg); }
+.card.story .badge { background: var(--story-bg); color: var(--story-fg); }
+.card.paper .badge { background: var(--paper-bg); color: var(--paper-fg); }
+.card h3 { margin: 0 0 9px; font-size: 1.08rem; line-height: 1.4; font-weight: 700;
+  letter-spacing: -0.25px; }
+.card .summary { margin: 0 0 9px; line-height: 1.65; font-size: .93rem; color: var(--text); }
+.card .why { margin: 0 0 12px; color: #8a5a00; font-size: .87rem; line-height: 1.55;
+  background: #fdf7ea; border-radius: 8px; padding: 8px 11px; }
+.card .foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  justify-content: space-between; border-top: 1px solid var(--line); padding-top: 11px; }
+.card .foot a { color: var(--accent); font-size: .84rem; text-decoration: none; word-break: break-all; }
+.card .foot a:hover { text-decoration: underline; }
+.conf { font-size: .73rem; color: var(--muted); border: 1px solid var(--line);
+  padding: 2px 9px; border-radius: 999px; background: #fafaf9; }
+.empty { color: var(--muted); padding: 40px 0; text-align: center; }
+.extra-links { margin: 0 0 12px; padding: 11px 13px; background: #fbfbfa;
+  border: 1px dashed rgba(0,0,0,.16); border-radius: 10px; }
+.extra-links .xl-head { color: var(--muted); font-size: .75rem; font-weight: 600;
+  margin: 0 0 7px; letter-spacing: .1px; }
+.extra-links ul { margin: 0; padding: 0; list-style: none; }
+.extra-links li { margin: 5px 0; font-size: .86rem; line-height: 1.5; }
+.extra-links li a { color: var(--accent); text-decoration: none; }
+.extra-links li a:hover { text-decoration: underline; }
+.extra-links .xl-note { color: var(--faint); font-size: .78rem; }
+/* Design v4 (2026-10-07, user-ordered): 최신 날짜 항목 정사각형 그리드 (2열, 2026-10-07 요청) */
+.day-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 12px; }
+.day-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
+.day-head .day-sub { color: var(--faint); font-size: .78rem; }
+.day-grid { column-count: 2; column-gap: 14px; margin-bottom: 26px; }
+@media (max-width: 500px) { .day-grid { column-count: 1; } }
+a.gcard { break-inside: avoid; display: flex; flex-direction: column; gap: 7px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 15px; margin: 0 0 14px;
+  overflow: hidden; text-decoration: none;
+  color: var(--text); box-shadow: var(--card-shadow); transition: box-shadow .15s ease; }
+a.gcard:hover { box-shadow: var(--card-shadow-hover); }
+.gcard .g-top { display: flex; align-items: center; gap: 8px; }
+.gcard .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .7rem;
+  letter-spacing: .1px; flex: 0 0 auto; }
+.gcard.news .badge  { background: var(--news-bg); color: var(--news-fg); }
+.gcard.story .badge { background: var(--story-bg); color: var(--story-fg); }
+.gcard.paper .badge { background: var(--paper-bg); color: var(--paper-fg); }
+.gcard time { color: var(--faint); font-size: .72rem; }
+.gcard h3 { margin: 0; font-size: 1.02rem; line-height: 1.4; font-weight: 700;
+  letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden; }
+.gcard .g-summary { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.55;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.gcard .g-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gcard .g-foot span:first-child { color: var(--accent); font-size: .76rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gcard .conf { font-size: .66rem; flex: 0 0 auto; }
+footer.page { max-width: 980px; margin: 0 auto; padding: 0 24px 36px;
+  color: var(--faint); font-size: .78rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html">AI 강의 뉴스 큐레이션</a></h1>
+  <div class="updated">마지막 업데이트: 2026-11-01</div>
+  <nav class="topnav">
+    <a href="../index.html">최신 (최근 30일)</a>
+    <a href="index.html">지난 아카이브 보기</a>
+  </nav>
+</header>
+<main>
+
+<details class="card story" data-category="story" data-search="머스크, 놀란에 맞서 AI판 &#x27;오디세이&#x27; 공개…3명이 2주, 비용은 수만달러 일론 머스크가 크리스토퍼 놀란 감독의 영화 &#x27;오디세이&#x27;를 겨냥해 만들겠다고 선언한 AI 영화의 첫 편 &#x27;맹세&#x27;가 공개됐다. 자체 영상 생성 AI &#x27;그록 이매진&#x27;을 런던의 스타트업 원더 스튜디오와 감독 데브 워커가 활용해 완성한 7분짜리 단편으로, 3인 팀이 2주도 안 걸려 만들었고 비용은 수만달러 수준이다. 2억5000만달러가 든 놀란의 영화와 비교하면 제작비 격차가 극명하지만, 어색한 연기와 부족한 서사라는 혹평도 나왔다. 제작진은 AI 영화에 쓴 프롬프트와 작업 과정을 공개하겠다고 밝혀 주목을 받았다. &#x27;3명·2주·수만달러 vs 2.5억달러&#x27;라는 숫자 대비가 AI 제작의 경제성을 한 방에 보여준다. 콘텐츠 업계 청중에게는 공포와 호기심을 동시에 자극하는 오프닝이다.">
+  <summary><span class="badge">이야기</span><time class="row-date">2026-11-01</time><span class="row-title">머스크, 놀란에 맞서 AI판 &#x27;오디세이&#x27; 공개…3명이 2주, 비용은 수만달러</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-07</span></div>
+  <p class="summary">일론 머스크가 크리스토퍼 놀란 감독의 영화 &#x27;오디세이&#x27;를 겨냥해 만들겠다고 선언한 AI 영화의 첫 편 &#x27;맹세&#x27;가 공개됐다. 자체 영상 생성 AI &#x27;그록 이매진&#x27;을 런던의 스타트업 원더 스튜디오와 감독 데브 워커가 활용해 완성한 7분짜리 단편으로, 3인 팀이 2주도 안 걸려 만들었고 비용은 수만달러 수준이다. 2억5000만달러가 든 놀란의 영화와 비교하면 제작비 격차가 극명하지만, 어색한 연기와 부족한 서사라는 혹평도 나왔다. 제작진은 AI 영화에 쓴 프롬프트와 작업 과정을 공개하겠다고 밝혀 주목을 받았다.</p>
+  <p class="why">💡 &#x27;3명·2주·수만달러 vs 2.5억달러&#x27;라는 숫자 대비가 AI 제작의 경제성을 한 방에 보여준다. 콘텐츠 업계 청중에게는 공포와 호기심을 동시에 자극하는 오프닝이다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216851" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card story" data-category="story" data-search="구글, 우주 데이터센터 위성에서 첫 AI 추론 성공…시 생성해 지구 전송 구글의 궤도 데이터센터 실험 &#x27;프로젝트 선캐처&#x27; 시제품 위성이 지난 10월 1일 발사 후 궤도에서 첫 AI 응답을 생성했다. 지상 관제팀이 탑재된 오픈모델 젬마 4에 우주를 주제로 하이쿠를 짓자고 명령하자, 노르웨이 스발바르 상공을 지나던 위성이 시 한 편을 지구로 내려보냈다. 위성에는 TPU 4개가 실렸지만 발전량이 최대 1kW라 한 번에 칩 하나를 약 20분만 가동할 수 있다. 우주 방사선과 냉각 문제가 남은 과제이며, 2027년에는 위성 간 광통신을 시연할 계획이다. &#x27;우주에서 AI가 지은 시&#x27;라는 장면 자체가 오프닝용으로는 최고조의 화제거리다. AI 데이터센터의 전력·입지 한계를 우주로 풀려는 시도를 감성적 스토리로 전달할 수 있다.">
+  <summary><span class="badge">이야기</span><time class="row-date">2026-11-01</time><span class="row-title">구글, 우주 데이터센터 위성에서 첫 AI 추론 성공…시 생성해 지구 전송</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-06</span></div>
+  <p class="summary">구글의 궤도 데이터센터 실험 &#x27;프로젝트 선캐처&#x27; 시제품 위성이 지난 10월 1일 발사 후 궤도에서 첫 AI 응답을 생성했다. 지상 관제팀이 탑재된 오픈모델 젬마 4에 우주를 주제로 하이쿠를 짓자고 명령하자, 노르웨이 스발바르 상공을 지나던 위성이 시 한 편을 지구로 내려보냈다. 위성에는 TPU 4개가 실렸지만 발전량이 최대 1kW라 한 번에 칩 하나를 약 20분만 가동할 수 있다. 우주 방사선과 냉각 문제가 남은 과제이며, 2027년에는 위성 간 광통신을 시연할 계획이다.</p>
+  <p class="why">💡 &#x27;우주에서 AI가 지은 시&#x27;라는 장면 자체가 오프닝용으로는 최고조의 화제거리다. AI 데이터센터의 전력·입지 한계를 우주로 풀려는 시도를 감성적 스토리로 전달할 수 있다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216837" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card news" data-category="news" data-search="오픈AI, 청소년 챗GPT 무기 정보 제한…폭력 징후 땐 대화 중단 오픈AI가 커뮤니티 안전 보고서를 내고 청소년 보호 조치를 강화한다고 발표했다. 폭력 의도가 드러나지 않는 질문이라도 악용 가능한 무기·보안 시스템 정보는 청소년에게 제공하지 않고, 폭력 집착이 감지되면 대화가 자동 종료되며 반복 시 계정이 일시 정지된다. 연령 추정 시스템으로 본인 설정과 무관하게 18세 미만으로 판단되면 청소년용 환경으로 자동 전환된다. 오픈AI는 3분기에만 200건 이상의 위협 사례를 사법기관에 신고했다고 밝혔고, 반기별 안전 보고서를 정례화하기로 했다. AI 챗봇 안전 논쟁의 최전선을 최신 수치와 정책으로 보여준다. 부모·교육자 청중이 많은 강의라면 즉각적인 관심과 토론을 끌어낼 수 있는 주제다.">
+  <summary><span class="badge">뉴스</span><time class="row-date">2026-11-01</time><span class="row-title">오픈AI, 청소년 챗GPT 무기 정보 제한…폭력 징후 땐 대화 중단</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-05</span></div>
+  <p class="summary">오픈AI가 커뮤니티 안전 보고서를 내고 청소년 보호 조치를 강화한다고 발표했다. 폭력 의도가 드러나지 않는 질문이라도 악용 가능한 무기·보안 시스템 정보는 청소년에게 제공하지 않고, 폭력 집착이 감지되면 대화가 자동 종료되며 반복 시 계정이 일시 정지된다. 연령 추정 시스템으로 본인 설정과 무관하게 18세 미만으로 판단되면 청소년용 환경으로 자동 전환된다. 오픈AI는 3분기에만 200건 이상의 위협 사례를 사법기관에 신고했다고 밝혔고, 반기별 안전 보고서를 정례화하기로 했다.</p>
+  <p class="why">💡 AI 챗봇 안전 논쟁의 최전선을 최신 수치와 정책으로 보여준다. 부모·교육자 청중이 많은 강의라면 즉각적인 관심과 토론을 끌어낼 수 있는 주제다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216847" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card news" data-category="news" data-search="구글 &quot;AI 경제 혁명, 똑똑한 모델보다 협력하는 에이전트가 이끈다&quot; 구글 딥마인드가 AGI 경제학 책임자와 공동 창업자 셰인 레그 등이 참여한 보고서 &#x27;지능의 경제학&#x27;과 108페이지 워킹페이퍼 &#x27;지능의 조직화&#x27;를 공개했다. 연구진은 AI 능력을 개별 업무 수행 &#x27;역량&#x27;과 여러 에이전트의 &#x27;조정 능력&#x27;으로 나누고, 경제를 바꾸는 열쇠는 후자라고 분석했다. AI가 대규모로 협력하면 기업 관리 비용이 줄어 소수 인력으로 수많은 에이전트를 거느린 초거대 기업이 등장할 수 있다고 전망했다. 초고역량 AI, 초협력 AI, ASI를 거치는 4단계 경제 변화 시나리오도 제시했다. &#x27;모델 지능이 아니라 협업이 경제를 바꾼다&#x27;는 명제는 에이전트 시대를 설명하는 프레임으로 쓰기 좋고, 기업 조직과 고용의 미래라는 청중 친숙한 주제와 직결된다.">
+  <summary><span class="badge">뉴스</span><time class="row-date">2026-11-01</time><span class="row-title">구글 &quot;AI 경제 혁명, 똑똑한 모델보다 협력하는 에이전트가 이끈다&quot;</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-04</span></div>
+  <p class="summary">구글 딥마인드가 AGI 경제학 책임자와 공동 창업자 셰인 레그 등이 참여한 보고서 &#x27;지능의 경제학&#x27;과 108페이지 워킹페이퍼 &#x27;지능의 조직화&#x27;를 공개했다. 연구진은 AI 능력을 개별 업무 수행 &#x27;역량&#x27;과 여러 에이전트의 &#x27;조정 능력&#x27;으로 나누고, 경제를 바꾸는 열쇠는 후자라고 분석했다. AI가 대규모로 협력하면 기업 관리 비용이 줄어 소수 인력으로 수많은 에이전트를 거느린 초거대 기업이 등장할 수 있다고 전망했다. 초고역량 AI, 초협력 AI, ASI를 거치는 4단계 경제 변화 시나리오도 제시했다.</p>
+  <p class="why">💡 &#x27;모델 지능이 아니라 협업이 경제를 바꾼다&#x27;는 명제는 에이전트 시대를 설명하는 프레임으로 쓰기 좋고, 기업 조직과 고용의 미래라는 청중 친숙한 주제와 직결된다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216855" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card news" data-category="news" data-search="앤트로픽, 클로드로 기존 게임 복제 금지…정상 작업까지 차단 논란 앤트로픽이 클로드 코드(오퍼스 5.5)에 &#x27;이미 존재하는 특정 게임을 복제하지 못한다&#x27;는 규칙 두 문장을 추가했다고 공식 확인했다. 지식재산권 침해를 막겠다는 취지지만, 개발자들 사이에서는 자기 게임의 치팅 방지 시스템을 만들거나 보안 취약점을 점검하는 정상 작업까지 거부당했다는 신고가 이어지고 있다. 리버스 엔지니어링 중에도 같은 차단이 걸리는 것으로 나타났다. 기술 담당 직원은 독창적인 게임이나 직접 설계한 자산으로 만드는 게임은 계속 가능하다고 해명했다. AI 코딩 도구의 &#x27;거절&#x27;이 왜 발생하는지, 안전 필터가 오작동할 때 개발자 경험이 어떻게 무너지는지를 보여주는 최신 사례로, AI 실습 강의에서 바로 화제로 쓸 수 있다.">
+  <summary><span class="badge">뉴스</span><time class="row-date">2026-11-01</time><span class="row-title">앤트로픽, 클로드로 기존 게임 복제 금지…정상 작업까지 차단 논란</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-03</span></div>
+  <p class="summary">앤트로픽이 클로드 코드(오퍼스 5.5)에 &#x27;이미 존재하는 특정 게임을 복제하지 못한다&#x27;는 규칙 두 문장을 추가했다고 공식 확인했다. 지식재산권 침해를 막겠다는 취지지만, 개발자들 사이에서는 자기 게임의 치팅 방지 시스템을 만들거나 보안 취약점을 점검하는 정상 작업까지 거부당했다는 신고가 이어지고 있다. 리버스 엔지니어링 중에도 같은 차단이 걸리는 것으로 나타났다. 기술 담당 직원은 독창적인 게임이나 직접 설계한 자산으로 만드는 게임은 계속 가능하다고 해명했다.</p>
+  <p class="why">💡 AI 코딩 도구의 &#x27;거절&#x27;이 왜 발생하는지, 안전 필터가 오작동할 때 개발자 경험이 어떻게 무너지는지를 보여주는 최신 사례로, AI 실습 강의에서 바로 화제로 쓸 수 있다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216862" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card news" data-category="news" data-search="메타, AI 투자 부담에 신용등급 강등 경고…내년 자본지출 300조 전망 S&amp;P 글로벌 레이팅스가 메타의 신용등급 전망을 &#x27;안정적&#x27;에서 &#x27;부정적&#x27;으로 하향했다. 3분기 매출은 크게 늘었지만 AI 인프라 자본지출이 영업현금흐름을 넘어서며 잉여현금흐름이 적자로 돌아선 것이 결정타였다. 메타는 올해 자본지출로 1350억~1450억달러를 예상하고 있고, S&amp;P는 내년 지출이 2250억달러를 넘어설 것으로 내다봤다. 클라우드 판매로 AI 비용을 회수하는 MS·구글·아마존과 달리 메타는 수익화 경로가 제한적이라는 평가에 회사 측은 동의하지 않는다고 반박했다. &#x27;AI 투자로 돈 벌 수 있는 곳은 어디인가&#x27;라는 강의 단골 질문에 신용평가사 시각이라는 새로운 각도를 제시한다. 빅테크가AA급에서 밀릴 만큼 AI가 재무 구조를 바꾸고 있다는 사실 자체가 충격적인 오프닝이다.">
+  <summary><span class="badge">뉴스</span><time class="row-date">2026-11-01</time><span class="row-title">메타, AI 투자 부담에 신용등급 강등 경고…내년 자본지출 300조 전망</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-02</span></div>
+  <p class="summary">S&amp;P 글로벌 레이팅스가 메타의 신용등급 전망을 &#x27;안정적&#x27;에서 &#x27;부정적&#x27;으로 하향했다. 3분기 매출은 크게 늘었지만 AI 인프라 자본지출이 영업현금흐름을 넘어서며 잉여현금흐름이 적자로 돌아선 것이 결정타였다. 메타는 올해 자본지출로 1350억~1450억달러를 예상하고 있고, S&amp;P는 내년 지출이 2250억달러를 넘어설 것으로 내다봤다. 클라우드 판매로 AI 비용을 회수하는 MS·구글·아마존과 달리 메타는 수익화 경로가 제한적이라는 평가에 회사 측은 동의하지 않는다고 반박했다.</p>
+  <p class="why">💡 &#x27;AI 투자로 돈 벌 수 있는 곳은 어디인가&#x27;라는 강의 단골 질문에 신용평가사 시각이라는 새로운 각도를 제시한다. 빅테크가AA급에서 밀릴 만큼 AI가 재무 구조를 바꾸고 있다는 사실 자체가 충격적인 오프닝이다.</p>
+  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216853" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+<details class="card news" data-category="news" data-search="삼성 사장단 50명 만난 알트먼 &quot;AI 활용 속도가 기업 경쟁력 결정&quot; 샘 알트먼 오픈AI CEO가 1박 2일 방한해 경기 용인 삼성인력개발원에서 삼성 주요 관계사 사장단 50여명과 간담회를 열었다. 그는 &quot;단순히 AI를 쓰는 것만으로는 경쟁 우위를 확보할 수 없고, AI를 활용해 얼마나 빠르게 움직이고 더 나은 제품을 만드느냐가 중요하다&quot;고 강조했다. 행사에서는 AI 코딩 에이전트 &#x27;코덱스&#x27;를 조작하기 쉽게 만든 소형 입력 장치 &#x27;코덱스 마이크로&#x27; 키보드가 경영진에게 선물로 전달되기도 했다. 알트먼 CEO는 SK 최태원 회장과의 오찬도 가진 것으로 알려졌다. 세계 AI 1인자가 한국 최대 기업 경영진을 직접 교육한 장면은 &#x27;AI 전환 속도&#x27;가 화두인 강의 오프닝으로 제격이고, 키보드 선물 에피소드가 사람이 지시하고 AI가 일하는 새 업무 방식을 상징적으로 보여준다. &quot;AI 뉴런 2개 조작했더니 인간 증오하는 악당으로&quot;…내부 구조 해독 활발 오픈모델 뉴런 두 개를 만져 성격이 바뀌었다는 &#x27;이블 큐원&#x27; 실험 — AI 해석 가능성 입문 사례 한국인 챗GPT 활용, 문서 편집 1위 유지…시각 자료 제작 1년 새 2배 오픈AI 시그널스 한국 데이터 — 우리 직장인이 실제로 AI를 무엇에 쓰는지 보여주는 통계 구글, 인터넷 없이 작동하는 &#x27;제미나이 라이브&#x27; 개발 중 안드로이드 앱 코드에서 발견된 오프라인 음성 AI — 온디바이스 경쟁 흐름 확인용 중국 GPU, 엔비디아 H200과 성능 대등 주장…AI 추론서 일부 앞서 일루바타르 &#x27;톈가이 300&#x27; 시연 — 미중 칩 경쟁의 현재 위치를 가늠할 기사 알트먼 &quot;AI 수학 연구에 수억달러 투입…공개 안 한 성과도 많아&quot; AI 수학 연구 비용과 검증 논란 — 같은 주제의 심층 백그라운드">
+  <summary><span class="badge">뉴스</span><time class="row-date">2026-11-01</time><span class="row-title">삼성 사장단 50명 만난 알트먼 &quot;AI 활용 속도가 기업 경쟁력 결정&quot;</span></summary>
+  <div class="body">
+  <div class="meta"><time>2026-11-01</time><span>2026-11-01-01</span></div>
+  <p class="summary">샘 알트먼 오픈AI CEO가 1박 2일 방한해 경기 용인 삼성인력개발원에서 삼성 주요 관계사 사장단 50여명과 간담회를 열었다. 그는 &quot;단순히 AI를 쓰는 것만으로는 경쟁 우위를 확보할 수 없고, AI를 활용해 얼마나 빠르게 움직이고 더 나은 제품을 만드느냐가 중요하다&quot;고 강조했다. 행사에서는 AI 코딩 에이전트 &#x27;코덱스&#x27;를 조작하기 쉽게 만든 소형 입력 장치 &#x27;코덱스 마이크로&#x27; 키보드가 경영진에게 선물로 전달되기도 했다. 알트먼 CEO는 SK 최태원 회장과의 오찬도 가진 것으로 알려졌다.</p>
+  <p class="why">💡 세계 AI 1인자가 한국 최대 기업 경영진을 직접 교육한 장면은 &#x27;AI 전환 속도&#x27;가 화두인 강의 오프닝으로 제격이고, 키보드 선물 에피소드가 사람이 지시하고 AI가 일하는 새 업무 방식을 상징적으로 보여준다.</p>
+<div class="extra-links"><p class="xl-head">📎 참고할 만한 다른 AI 기사</p><ul><li><a href="https://www.aitimes.com/news/articleView.html?idxno=216861" target="_blank" rel="noopener noreferrer">&quot;AI 뉴런 2개 조작했더니 인간 증오하는 악당으로&quot;…내부 구조 해독 활발</a> <span class="xl-note">— 오픈모델 뉴런 두 개를 만져 성격이 바뀌었다는 &#x27;이블 큐원&#x27; 실험 — AI 해석 가능성 입문 사례</span></li><li><a href="https://www.aitimes.com/news/articleView.html?idxno=216834" target="_blank" rel="noopener noreferrer">한국인 챗GPT 활용, 문서 편집 1위 유지…시각 자료 제작 1년 새 2배</a> <span class="xl-note">— 오픈AI 시그널스 한국 데이터 — 우리 직장인이 실제로 AI를 무엇에 쓰는지 보여주는 통계</span></li><li><a href="https://www.aitimes.com/news/articleView.html?idxno=216841" target="_blank" rel="noopener noreferrer">구글, 인터넷 없이 작동하는 &#x27;제미나이 라이브&#x27; 개발 중</a> <span class="xl-note">— 안드로이드 앱 코드에서 발견된 오프라인 음성 AI — 온디바이스 경쟁 흐름 확인용</span></li><li><a href="https://www.aitimes.com/news/articleView.html?idxno=216844" target="_blank" rel="noopener noreferrer">중국 GPU, 엔비디아 H200과 성능 대등 주장…AI 추론서 일부 앞서</a> <span class="xl-note">— 일루바타르 &#x27;톈가이 300&#x27; 시연 — 미중 칩 경쟁의 현재 위치를 가늠할 기사</span></li><li><a href="https://www.aitimes.com/news/articleView.html?idxno=216850" target="_blank" rel="noopener noreferrer">알트먼 &quot;AI 수학 연구에 수억달러 투입…공개 안 한 성과도 많아&quot;</a> <span class="xl-note">— AI 수학 연구 비용과 검증 논란 — 같은 주제의 심층 백그라운드</span></li></ul></div>  <div class="foot"><a href="https://www.aitimes.com/news/articleView.html?idxno=216852" target="_blank" rel="noopener noreferrer">🔗 출처: aitimes.com</a><span class="conf">검증됨</span></div>
+  </div>
+</details>
+</main>
+<footer class="page">생성형 AI 활용 강의용 뉴스·이야기 모음 · 생성일 2026-11-01</footer>
+<script>
+(function () {
+  var q = document.getElementById('q');
+  var btns = document.querySelectorAll('.filter-btn');
+  var cat = 'all';
+  function apply() {
+    var needle = (q && q.value ? q.value : '').toLowerCase();
+    document.querySelectorAll('.card').forEach(function (c) {
+      var okCat = cat === 'all' || c.getAttribute('data-category') === cat;
+      var hay = (c.getAttribute('data-search') || '').toLowerCase();
+      var okText = !needle || hay.indexOf(needle) !== -1;
+      var show = okCat && okText;
+      c.style.display = show ? '' : 'none';
+      // 검색어에 걸린 항목은 자동으로 펼침 (v3 compact list)
+      if (needle && show && c.tagName === 'DETAILS') c.open = true;
+    });
+  }
+  if (q) q.addEventListener('input', apply);
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      cat = b.getAttribute('data-f');
+      btns.forEach(function (x) { x.classList.toggle('active', x === b); });
+      apply();
+    });
+  });
+})();
+</script>
+</body>
+</html>
